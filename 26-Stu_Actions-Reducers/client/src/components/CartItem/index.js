@@ -1,47 +1,35 @@
 import React from 'react';
-import { useStoreContext } from "../../utils/GlobalState";
-import { REMOVE_FROM_CART, UPDATE_CART_QUANTITY } from "../../utils/actions";
+import { useDispatch } from 'react-redux';
 import { idbPromise } from "../../utils/helpers";
+import { removeFromCart, updateCartQuantity } from '../../features/cartSlice';
 
 const CartItem = ({ item }) => {
 
-  const [, dispatch] = useStoreContext();
+  const dispatch = useDispatch();
 
-  const removeFromCart = item => {
-    dispatch({
-      type: REMOVE_FROM_CART,
-      _id: item._id
-    });
+  const handleRemoveFromCart = (item) => {
+    dispatch(removeFromCart({ _id: item._id }));
     idbPromise('cart', 'delete', { ...item });
-
-  };
-
-  const onChange = (e) => {
-    const value = e.target.value;
-    if (value === '0') {
-      dispatch({
-        type: REMOVE_FROM_CART,
-        _id: item._id
-      });
-      idbPromise('cart', 'delete', { ...item });
-
-    } else {
-      dispatch({
-        type: UPDATE_CART_QUANTITY,
-        _id: item._id,
-        purchaseQuantity: parseInt(value)
-      });
-      idbPromise('cart', 'put', { ...item, purchaseQuantity: parseInt(value) });
-
     }
-  }
+  };
+    const handleQuantityChange = (e) => {
+
+      const value = parseInt(e.target.value, 10);
+      if (value === 0) {
+        dispatch(removeFromCart({ _id: item._id }));
+        idbPromise('cart', 'delete', { ...item });
+      }else {
+        dispatch(updateCartQuantity({ _id: item._id, purchaseQuantity: value }));
+        idbPromise('cart', 'put', { ...item, purchaseQuantity: value });
+      } 
+    
 
   return (
     <div className="flex-row">
       <div>
         <img
           src={`/images/${item.image}`}
-          alt=""
+          alt={item.name}
         />
       </div>
       <div>
@@ -52,12 +40,12 @@ const CartItem = ({ item }) => {
             type="number"
             placeholder="1"
             value={item.purchaseQuantity}
-            onChange={onChange}
+            onChange={handleQuantityChange}
           />
           <span
             role="img"
             aria-label="trash"
-            onClick={() => removeFromCart(item)}
+            onClick={() => handleRemoveFromCart(item)}
           >
             🗑️
           </span>
@@ -65,6 +53,6 @@ const CartItem = ({ item }) => {
       </div>
     </div>
   );
-}
+};
 
 export default CartItem;
