@@ -5,22 +5,13 @@ import { idbPromise } from "../../utils/helpers";
 import { useDispatch, useSelector } from 'react-redux';
 import { addToCart, updateCartQuantity } from '../../features/cartSlice';
 
-function ProductItem(item) {
+function ProductItem({ image, name, _id, price, quantity }) { // Use destructuring here
   const dispatch = useDispatch();
-
-  const {
-    image,
-    name,
-    _id,
-    price,
-    quantity
-  } = item;
-
   const cart = useSelector((state) => state.cart.cart);
   
-const handleAddToCart = () => {
-
+  const handleAddToCart = () => {
     const itemInCart = cart.find((cartItem) => cartItem._id === _id);
+
     if (itemInCart) {
       dispatch(
         updateCartQuantity({
@@ -35,26 +26,38 @@ const handleAddToCart = () => {
     } else {
       dispatch(
         addToCart({
-          ...item,
+          _id,
+          image,
+          name,
+          price,
+          quantity,
           purchaseQuantity: 1,
         })
       );
-      idbPromise("cart", "put", { ...item, purchaseQuantity: 1 });
+      idbPromise("cart", "put", {
+        _id,
+        image,
+        name,
+        price,
+        quantity,
+        purchaseQuantity: 1,
+      });
+    }
   };
 
   return (
     <div className="card px-1 py-1">
       <Link to={`/products/${_id}`}>
-      <img alt={name} src={`/images/${image}`} />
+        <img alt={name} src={`/images/${image}`} />
         <p>{name}</p>
       </Link>
       <div>
-      <div> {quantity} {pluralize("item", quantity)} in stock</div>
+        <div> {quantity} {pluralize("item", quantity)} in stock</div>
         <span>${price}</span>
       </div>
       <button onClick={handleAddToCart}>Add to cart</button>
     </div>
   );
-}};
+};
 
 export default ProductItem;

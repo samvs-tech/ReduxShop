@@ -7,22 +7,24 @@ const CartItem = ({ item }) => {
 
   const dispatch = useDispatch();
 
-  const handleRemoveFromCart = (item) => {
+const handleRemoveFromCart = (item) => {
+dispatch(removeFromCart({ _id: item._id }));
+idbPromise('cart', 'delete', { ...item });
+}
+
+const handleQuantityChange = (e) => {
+
+  const value = parseInt(e.target.value, 10);
+  if (value === 0) {
     dispatch(removeFromCart({ _id: item._id }));
     idbPromise('cart', 'delete', { ...item });
-    }
-  };
-    const handleQuantityChange = (e) => {
+  }else {
+    dispatch(updateCartQuantity({ _id: item._id, purchaseQuantity: value }));
+    idbPromise('cart', 'put', { ...item, purchaseQuantity: value });
+  } 
+}
 
-      const value = parseInt(e.target.value, 10);
-      if (value === 0) {
-        dispatch(removeFromCart({ _id: item._id }));
-        idbPromise('cart', 'delete', { ...item });
-      }else {
-        dispatch(updateCartQuantity({ _id: item._id, purchaseQuantity: value }));
-        idbPromise('cart', 'put', { ...item, purchaseQuantity: value });
-      } 
-    
+
 
   return (
     <div className="flex-row">
@@ -54,5 +56,4 @@ const CartItem = ({ item }) => {
     </div>
   );
 };
-
 export default CartItem;

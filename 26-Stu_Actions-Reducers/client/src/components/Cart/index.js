@@ -20,15 +20,20 @@ const Cart = () => {
   const dispatch = useDispatch();
   const cart = useSelector(selectCart);
   const cartOpen = useSelector(selectCartOpen);
+
   const [getCheckout, { data }] = useLazyQuery(QUERY_CHECKOUT);
 
   useEffect(() => {
-    if (data) {
+  if (data) {
+    if (data.checkout) {
       stripePromise.then((res) => {
         res.redirectToCheckout({ sessionId: data.checkout.session });
       });
+    } else {
+      console.error("Checkout session is null:", data);
     }
-  }, [data]);
+  }
+}, [data]);
 
   useEffect(() => {
     async function getCart() {
@@ -39,10 +44,10 @@ const Cart = () => {
     if (!cart.length) {
       getCart();
     }
-  }, [state.cart.length, dispatch]);
+  }, [cart.length, dispatch]);
 
-  function toggleCart() {
-    dispatch({ type: TOGGLE_CART });
+  function handleToggleCart() {
+    dispatch(toggleCart());
   }
 
   function calculateTotal() {
